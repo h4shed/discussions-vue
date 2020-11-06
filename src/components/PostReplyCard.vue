@@ -1,15 +1,17 @@
 <template>
   <div>
-    <PostCard
+    <PostCard 
       ref="postCard"
       :clickable="clickable"
       :post="reply.post"
       :display="display"
       :editing="editing"
+      :expands="expands"
+      @expandsProxy="expandsValue"
       @submit-post="submitPost"
     >
       <template v-slot:editor>
-        <PostSubmitter
+        <PostSubmitter 
           edit
           :title-field="(reply.post.uuid == reply.post.threadUuid)"
           :parent-post="reply.post"
@@ -20,14 +22,17 @@
         />
       </template>
       <template v-slot:actions="{ tip }">
-        <PostCardActions
+       <v-row no-gutters class="mt-0 mb-n3">
+        <PostCardActions 
           v-if="reply.post.transaction"
           :post="reply.post"
           :isCommentDisplay="true"
           @reply="!isLoggedIn ? $store.commit('setLoginDialogOpen', true) : (showSubmitter = true)"
           @edit="startEditing()"
           @tip="tip"
+          :expands="expands" @expandsProxy="expandsValue"
         />
+       </v-row>
       </template>
       <template v-slot:replies>
         <div v-if="showSubmitter" class="ml-1 mr-1 mb-3">
@@ -39,7 +44,7 @@
             @submit-post="submitPost"
           />
         </div>
-        <PostReplyCard
+        <PostReplyCard 
           ref="replies"
           v-for="(r) in reply.replies"
           :clickable="clickable"
@@ -74,15 +79,30 @@ export default {
     display: { type: String, default: "comment" },
   },
   computed: {
+      isCompactDisplay() {
+      return this.display == "compact";
+    },
     ...mapGetters(["isLoggedIn"]),
   },
-  data() {
-    return {
-      showSubmitter: false,
-      editing: false,
-    };
+  watch: {
+    isCompactDisplay() {
+      if (this.isCompactDisplay) this.expands = -1;
+      else this.expands = 0;
+    },
+  },
+  data: () => ({
+    showSubmitter: false,
+    editing: false,
+    expands: 0, // 0 is show, -1 is don't show
+  }),
+  async mounted() {
+    if (this.isCompactDisplay) this.expands = -1;
+    else this.expands = 0;
   },
   methods: {
+    expandsValue: function(params) {
+      this.expands = params;
+    },
     startEditing() {
       this.editing = true;
       this.$refs.editor.setEditorContent(

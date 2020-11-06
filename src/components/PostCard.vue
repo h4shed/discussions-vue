@@ -1,51 +1,7 @@
 <template>
-  <v-card v-if="!post.isSpam || !hideSpam" :class="`post-card post-card-${this.post.transaction}`">
-    <v-row no-gutters class="overline">
-      <div class="pl-3 mt-1">
-        <div class="d-inline-block pr-3" v-if="!$vuetify.breakpoint.mobile || post.threadTree">
-          <v-btn icon @click="expanded = expanded ? 0 : -1">
-            <v-icon>{{ expanded ? 'expand_less' : 'expand_more' }}</v-icon>
-          </v-btn>
-        </div>
-        <div class="d-inline">
-          <div
-            class="d-inline-block pr-3"
-            v-if="(!$vuetify.breakpoint.mobile && !post.threadTree) || (isCommentDisplay && isThread) || (isBrowsing && isMultiTag)"
-          >
-            <TagLink
-              :class="{'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay }"
-              inline
-              popover
-              :tag="post.sub"
-            />
-          </div>
-          <div class="d-inline-block pr-3">
-            <UserProfileLink
-              popover
-              :class="{'moderator': isModerator(post.sub, post.pub), 'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay }"
-              :displayName="post.displayName"
-              :publicKey="post.pub"
-            />
-          </div>
-        </div>
-        <div class="d-inline-block pr-3">
-          <PostThreadLink :post="post">
-            <span v-show="!post.edit">{{ shortTime(post.createdAt) }}</span>
-            <span v-show="post.edit">
-              <v-icon dense small>edit</v-icon>
-              {{ shortTime(post.editedAt) }}
-            </span>
-          </PostThreadLink>
-        </div>
-        <div class="d-inline-block pr-3" v-if="post.isPinned || post.isSpam || post.isNSFW">
-          <v-icon v-if="post.isPinned" color="success">push_pin</v-icon>
-          <v-icon v-if="post.isSpam" color="error">error</v-icon>
-          <v-chip v-if="post.isNSFW" small color="orange" text-color="white">18+</v-chip>
-        </div>
-        <div class="d-inline-block pr-3">
-          <PostTips class="d-inline" :post="post" />
-        </div>
-      </div>
+  <v-card outlined v-if="!post.isSpam || !hideSpam" :class="`post-card post-card-${this.post.transaction}`">
+    <v-row no-gutters class="overline" v-if="!isCompactDisplay && !post.threadTree">
+        <PostCardInfo :post="post" />
     </v-row>
 
     <div v-show="!editing">
@@ -57,9 +13,15 @@
         </v-row>
       </div>
       <div v-else>
-        <v-row class="headline" v-if="isThread && post.title">
-          <v-col cols="12">
-            <div class="pl-3 pr-3">
+
+        <v-row no-gutters class="headline" v-if="isThread">
+        <div class="d-inline-block mt-n1" v-if="!$vuetify.breakpoint.mobile || post.threadTree">
+          <v-btn icon @click="(expands = expands ? 0 : -1)">
+            <v-icon>{{ expands ? 'expand_more' : 'expand_less'}}</v-icon>
+          </v-btn>
+        </div>
+          <v-col cols="11">
+            <div class="pl-1 mt-0">
               <PostThreadLink
                 :class="{'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay }"
                 :post="post"
@@ -68,9 +30,9 @@
           </v-col>
         </v-row>
 
-        <v-expansion-panels class="mt-2" flat tile :value="expanded">
+        <v-expansion-panels flat tile :value="expands">
           <v-expansion-panel>
-            <v-expansion-panel-content>
+            <v-expansion-panel-content class="mt-0 mb-0">
               <v-card flat :color="contentBackgroundColor" v-if="isPaidLockContent">
                 <div class="text-center">
                   <p v-if="!isPaidLockForever">
@@ -84,7 +46,11 @@
                   >Unlock for {{ post.paywall.asset }}</v-btn>
                 </div>
               </v-card>
-              <v-card flat @click.native="cardClicked" :color="contentBackgroundColor" v-else>
+              <v-card :class="isNotifications && isPreviewDisplay ? 'mb-n10' 
+              : isNotifications ? 'mb-n13' : isCommentDisplay ? 'mb-n13' 
+              : isFullDisplay ? 'mb-n9' : isPreviewDisplay ? 'mb-n5' 
+              : isCompactDisplay ? 'mb-n9' : 'mb-n1'" flat 
+              @click.native="cardClicked" :color="contentBackgroundColor" v-else>
                 <div
                   :class="{ 
                     'dark-fade': $vuetify.theme.dark,
@@ -107,13 +73,14 @@
 
     <slot name="actions" :tip="tip"></slot>
 
-    <div class="post-replies ml-1">
+    <div class="post-replies ml-2 mb-n1 mt-1">
       <slot name="replies"></slot>
     </div>
   </v-card>
 </template>
 
 <script>
+
 import loadTelegram from "../assets/telegram";
 
 import { mapState, mapGetters } from "vuex";
@@ -128,10 +95,7 @@ import { createArtificalTips, isValidAsset } from "@/novusphere-js/uid";
 import { sleep } from "@/novusphere-js/utility";
 
 import { shortTimeMixin } from "@/mixins/shortTime";
-
-import UserProfileLink from "@/components/UserProfileLink";
-import TagLink from "@/components/TagLink";
-import PostTips from "@/components/PostTips";
+import PostCardInfo from "@/components/PostCardInfo";
 import PostThreadLink from "@/components/PostThreadLink";
 
 import Countdown from "@/components/Countdown";
@@ -282,15 +246,8 @@ export default {
   name: "PostCard",
   mixins: [shortTimeMixin, userActionsMixin],
   components: {
-    UserProfileLink,
-    TagLink,
-    //TagIcon,
-    //PublicKeyIcon,
-    //PostCardActions,
-    PostTips,
     PostThreadLink,
-    //CommunityCard,
-    //PostSubmitter,
+    PostCardInfo,
     Countdown,
   },
   props: {
@@ -299,6 +256,8 @@ export default {
     comments: Array,
     display: String,
     editing: Boolean,
+    expands: Number,
+
   },
   computed: {
     contentBackgroundColor() {
@@ -325,6 +284,9 @@ export default {
     },
     isCommentDisplay() {
       return this.display == "comment";
+    },
+    isNotifications() {
+      return this.$route.path == "/notifications/posts";
     },
     isCompactDisplay() {
       return this.display == "compact";
@@ -396,25 +358,24 @@ export default {
     "post.content": async function () {
       this.postHTML = await this.post.getContentHTML();
     },
+  expands: function() {
+    this.$emit("expandsProxy", this.expands);
+    },
     isCompactDisplay() {
-      if (this.isCompactDisplay) this.expanded = -1;
-      else this.expanded = 0;
+      if (this.isCompactDisplay) this.expands = -1;
+      else this.expands = 0;
     },
   },
   data: () => ({
     community: null,
-    expanded: 0, // 0 is show, -1 is don't show
     postHTML: "",
     forceReveal: false,
     removeNSFWOverlay: false,
+    expands: 0, // 0 is show, -1 is don't show
   }),
   async mounted() {
-    if (this.isCompactDisplay) this.expanded = -1;
-    else this.expanded = 0;
-
-    if (this.post.transaction == '073dad28a4463fbeef67e842f3965755322c335325ddb158858786b9faf1f35a') {
-      console.log(`meep`, Date.now(), this.post.createdAt.getTime(), Date.now() - this.post.createdAt.getTime());
-    }
+    if (this.isCompactDisplay) this.expands = -1;
+    else this.expands = 0;
 
     this.postHTML = await this.post.getContentHTML();
 
@@ -527,7 +488,6 @@ export default {
       min-width: 0px !important; /* instagram override */
       max-width: min(100%, 512px) !important;
       display: block;
-      padding-bottom: 10px;
     }
 
     img {
@@ -546,7 +506,7 @@ export default {
   }
 
   .post-replies {
-    border-left: 2px solid lightgray;
+    border-left: 3px solid lightgray;
   }
 
   .content-fade {

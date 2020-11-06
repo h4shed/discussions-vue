@@ -2,7 +2,7 @@
   <div>
     <v-progress-linear v-if="!cursor && !noCursor" indeterminate></v-progress-linear>
     <div v-else>
-      <v-row align="start" justify="end">
+      <v-row align="start" justify="end" no-gutters>
         <PostSortSelect v-if="!noSort" v-model="sort" />
         <PostDisplaySelect v-model="display" />
       </v-row>

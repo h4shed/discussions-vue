@@ -4,24 +4,6 @@
       <UserProfileLink btn :displayName="displayName" :publicKey="keys.arbitrary.pub" />
     </v-list-item>
     <v-list-item>
-      <v-text-field
-        type="search"
-        autocomplete="new-password"
-        dense
-        hide-details
-        append-icon="search"
-        class="mt-3"
-        v-model="search"
-        label="Search"
-        rounded
-        outlined
-        @keydown.enter="goSearch()"
-        @click:append="goSearch()"
-        :readonly="searchReadonly"
-        @focus="searchFocus()"
-      ></v-text-field>
-    </v-list-item>
-    <v-list-item>
       <v-btn
         class="justify-start"
         block
@@ -204,9 +186,6 @@ export default {
       } catch (ex) {
         return; // Avoided redundant navigation
       }
-    },
-    async goSearch() {
-      this.$router.push(`/search?q=${this.search}`);
     },
   },
 };

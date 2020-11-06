@@ -1,7 +1,7 @@
 <template>
   <div>
-    <v-row>
-      <v-col cols="12">
+    <v-row no-gutters>
+      <v-col :cols="noRight ? 12 : 12">
         <v-card flat>
           <img v-if="false" class="md-banner" :src="banner" />
           <v-card-text v-if="this.$slots.header">
@@ -11,8 +11,14 @@
         <slot name="header2"></slot>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col :cols="12">
+    <v-row v-if="$vuetify.breakpoint.mobile" no-gutters>
+      <v-col :cols="noLeft ? 12 : 12">
+        <v-progress-linear v-if="needSyncAccount" indeterminate></v-progress-linear>
+        <slot name="content"></slot>
+      </v-col>
+    </v-row>
+    <v-row v-else no-gutters>
+      <v-col :cols="noRight ? 12 : 12">
         <v-progress-linear v-if="needSyncAccount" indeterminate></v-progress-linear>
         <slot v-else name="content"></slot>
       </v-col>
@@ -24,14 +30,9 @@
 import { mapState } from "vuex";
 import site from "@/server/site";
 
-//import TrendingCard from "@/components/TrendingCard";
-//import AboutUsCard from "@/components/AboutUsCard";
-
 export default {
   name: "BrowsePageLayout",
   components: {
-    //TrendingCard,
-    //AboutUsCard
   },
   props: {
     noRight: Boolean,

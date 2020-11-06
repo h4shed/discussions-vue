@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-row>
+    <v-row no-gutters>
       <template v-if="pinned">
         <v-col cols="12" v-for="(p, i) in pinned" :key="i">
           <PostScrollCard :show-reply="showReply" :display="display" :post="p" />

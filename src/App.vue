@@ -1,13 +1,9 @@
 <template>
   <v-app>
-    <AppBar @drawer="drawer = !drawer" />
-    <v-navigation-drawer app clipped v-model="drawer">
-      <AppNav />
-    </v-navigation-drawer>
-    <v-navigation-drawer app clipped right v-model="drawer">
-      <AppNavRight />
-    </v-navigation-drawer>
-    <v-main :style="{ background: $vuetify.theme.themes[theme].background }">
+    <AppBar />
+
+
+    <v-main :style="{background: $vuetify.theme.themes[theme].background}">
       <AppAlertBar />
       <v-menu
         z-index="9999"
@@ -47,13 +43,7 @@
         @click:outside="$store.commit('setLoginDialogOpen', false)"
       >
         <v-card>
-          <v-tabs
-            v-model="loginTab"
-            background-color="primary"
-            slider-color="accent"
-            dark
-            grow
-          >
+          <v-tabs v-model="loginTab" background-color="primary" slider-color="accent" dark grow>
             <v-tab>Log in</v-tab>
             <v-tab>Sign up</v-tab>
           </v-tabs>
@@ -73,9 +63,7 @@
         :retain-focus="false"
         max-width="600"
         v-model="isTransferDialogOpen"
-        @click:outside="
-          $store.commit('setTransferDialogOpen', { value: false })
-        "
+        @click:outside="$store.commit('setTransferDialogOpen', { value: false })"
       >
         <ApproveTransfersCard
           closable
@@ -91,12 +79,7 @@
         v-model="isSendTipDialogOpen"
         @click:outside="$store.commit('setSendTipDialogOpen', { value: false })"
       >
-        <SendTipCard
-          ref="sendTip"
-          closable
-          @close="closeTip"
-          :recipient="sendTipRecipient"
-        />
+        <SendTipCard ref="sendTip" closable @close="closeTip" :recipient="sendTipRecipient" />
       </v-dialog>
 
       <FullScreenDialog v-model="isThreadDialogOpenProxy">
@@ -105,21 +88,16 @@
             <v-btn
               text
               class="mr-4"
-              @click="
-                $store.commit('setThreadDialogOpen', {
-                  value: false,
-                  path: $route.path,
-                })
-              "
+              @click="$store.commit('setThreadDialogOpen', { value: false, path: $route.path })"
             >
               <v-icon>close</v-icon>Close
             </v-btn>
           </v-card-title>
-          <v-card-text :class="{ dark: darkMode, light: !darkMode }">
-            <v-row>
+          <v-card-text :class="{ 'dark': darkMode, 'light': !darkMode }">
+            <v-row no-gutters>
               <v-col :cols="12">
                 <ThreadBrowser
-                  class="mt-3"
+                  class="mt-0"
                   :referenceId="threadDialogRef1"
                   :referenceId2="threadDialogRef2"
                 />
@@ -132,9 +110,7 @@
       <v-dialog
         v-model="isImageUploadDialogOpen"
         max-width="600"
-        @click:outside="
-          $store.commit('setImageUploadDialogOpen', { value: false })
-        "
+        @click:outside="$store.commit('setImageUploadDialogOpen', { value: false })"
       >
         <ImageUploadCard />
       </v-dialog>
@@ -142,24 +118,15 @@
       <v-dialog
         v-model="isInsertLinkDialogOpen"
         max-width="600"
-        @click:outside="
-          $store.commit('setInsertLinkDialogOpen', { value: false })
-        "
+        @click:outside="$store.commit('setInsertLinkDialogOpen', { value: false })"
       >
         <InsertLinkCard />
       </v-dialog>
 
       <ImageViewer ref="imgViewer" :images="imgViewerSrcs" />
 
-      <v-container v-if="$vuetify.breakpoint.mobile">
+      <v-container fluid>
         <v-row no-gutters>
-          <v-col cols="12">
-            <router-view></router-view>
-          </v-col>
-        </v-row>
-      </v-container>
-      <v-container v-else>
-        <v-row>
           <v-col cols="12">
             <router-view></router-view>
           </v-col>
@@ -175,9 +142,8 @@ import { getUserAccountObject } from "@/novusphere-js/discussions/api";
 import { subscribeAccount } from "@/novusphere-js/discussions/gateway";
 
 import AppBar from "@/components/AppBar";
+//import AppDrawer from "@/components/AppDrawer";
 import AppAlertBar from "@/components/AppAlertBar";
-import AppNav from "@/components/AppNav";
-import AppNavRight from "@/components/AppNavRight";
 import LoginCard from "@/components/LoginCard";
 import SignupCard from "@/components/SignupCard";
 import ImageUploadCard from "@/components/MarkdownEditor/ImageUploadCard";
@@ -190,16 +156,13 @@ import CommunityCard from "@/components/CommunityCard";
 import FullScreenDialog from "@/components/FullScreenDialog";
 import ImageViewer from "@/components/ImageViewer";
 
-//import TrendingCard from "@/components/TrendingCard";
-//import AboutUsCard from "@/components/AboutUsCard";
 
 export default {
   name: "App",
   components: {
     AppBar,
+    //AppDrawer,
     AppAlertBar,
-    AppNav,
-    AppNavRight,
     LoginCard,
     SignupCard,
     ImageUploadCard,
@@ -212,8 +175,6 @@ export default {
     FullScreenDialog,
     ImageViewer,
 
-    //TrendingCard,
-    //AboutUsCard,
   },
   watch: {
     imgViewerSrcs() {
@@ -350,7 +311,6 @@ export default {
   },
   data: () => ({
     loginTab: null,
-    drawer: true
   }),
   created() {
     window.$app = this;
@@ -395,116 +355,20 @@ export default {
 };
 </script>
 
-<style scoped>
-.nav--sticky {
-  position: sticky;
-  top: 88px;
-}
-</style>
-
-<style lang="scss">
-html {
-  margin-right: calc(-1 * (100vw - 100%));
-  overflow-x: hidden;
-  overflow-y: scroll;
-}
-
-body {
-  //position: relative;
-  overflow-x: hidden;
-  overflow-y: scroll;
-}
-
-/* I LOVE IOS AND SAFARI IT'S MY FAVORITE BROWSER */
-@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
-  only screen and (-o-min-device-pixel-ratio: 3/2),
-  only screen and (min--moz-device-pixel-ratio: 1.5),
-  only screen and (min-device-pixel-ratio: 1.5) {
-  html,
-  body {
-    background-color: #ecf0f1;
-    height: 100%;
-    width: 100%;
-    overflow-x: hidden;
-
-    -webkit-overflow-scrolling: touch;
-
-    .dark {
-      background: #000000;
-    }
-  }
-}
+<style>
 
 .text-decoration-ellipsis {
   text-overflow: ellipsis;
 
   /* Required for text-overflow to do anything */
-  white-space: nowrap;
-  overflow: hidden;
+  white-space: nowrap; /*prevents text wrap in whitespace*/
+  //overflow: hidden; /* truncates overflow text */
 }
 
-blockquote {
+blockquote { /* Required for quoting in replies */
   border-left: 4px solid #ccc;
   margin-bottom: 5px;
   margin-top: 5px;
   padding-left: 16px;
-}
-
-@mixin width-scrollbar {
-  &::-webkit-scrollbar {
-    width: 15px;
-  }
-  @media only screen and (max-width: 1264px) {
-    &::-webkit-scrollbar {
-      width: 10px;
-    }
-  }
-}
-
-@mixin light-scrollbar {
-  @include width-scrollbar();
-  &::-webkit-scrollbar-track {
-    background: #e6e6e6;
-    border-left: 1px solid #dadada;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: #b0b0b0;
-    border: solid 3px #e6e6e6;
-    border-radius: 7px;
-    &:hover {
-      background: black;
-    }
-  }
-}
-
-@mixin dark-scrollbar {
-  @include width-scrollbar();
-  &::-webkit-scrollbar-track {
-    background: #202020;
-    border-left: 1px solid #2c2c2c;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: #3e3e3e;
-    border: solid 3px #202020;
-    border-radius: 7px;
-    &:hover {
-      background: white;
-    }
-  }
-}
-
-.light {
-  @include light-scrollbar();
-  .v-dialog,
-  .scrollable {
-    @include light-scrollbar();
-  }
-}
-.dark {
-  @include dark-scrollbar();
-  .v-dialog,
-  .scrollable {
-    @include dark-scrollbar();
-  }
 }
 </style>

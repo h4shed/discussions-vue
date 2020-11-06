@@ -10,9 +10,11 @@
           :reply="comment"
           @submit-post="submitPost"
         />
-        <PostCard v-else :clickable="true" :display="display" :post="post">
+        <PostCard v-else :clickable="true" :display="display" :post="post" :expands="expands" @expandsProxy="expandsValue">
           <template v-slot:actions="{ tip }">
-            <PostCardActions no-edit :post="post" :isCommentDisplay="false" @tip="tip" />
+           <v-row>
+             <PostCardActions no-edit :post="post" :isCommentDisplay="false" @tip="tip" :expands="expands" @expandsProxy="expandsValue"/>
+           </v-row>
           </template>
         </PostCard>
       </template>
@@ -27,15 +29,18 @@
       :reply="comment"
       @submit-post="submitPost"
     />
-    <PostCard v-else :clickable="true" :display="display" :post="post">
+    <PostCard v-else :clickable="true" :display="display" :post="post" :expands="expands" @expandsProxy="expandsValue">
       <template v-slot:actions="{ tip }">
-        <PostCardActions no-edit :post="post" :isCommentDisplay="false" @tip="tip" />
+       <v-row no-gutters class="mb-n4 mt-n4 ml-n2 ">
+        <PostCardActions no-edit :post="post" :isCommentDisplay="false" @tip="tip" :expands="expands" @expandsProxy="expandsValue"/>
+       </v-row>
       </template>
     </PostCard>
   </div>
 </template>
 
 <script>
+
 import { mapState } from "vuex";
 import { submitPostMixin } from "@/mixins/submitPost";
 import PostCard from "@/components/PostCard";
@@ -45,6 +50,11 @@ import PostCardActions from "@/components/PostCardActions";
 export default {
   name: "PostScrollCard",
   mixins: [submitPostMixin],
+  methods: {
+    expandsValue: function(params) {
+      this.expands = params;
+    }
+  },
   components: {
     PostCard,
     PostCardActions,
@@ -62,6 +72,7 @@ export default {
   },
   data: () => ({
     comment: null,
+    expands: 0, // 0 is show, -1 is don't show
   }),
   created() {
     if (this.showReply) {

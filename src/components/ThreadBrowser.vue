@@ -1,8 +1,8 @@
 <template>
   <div>
     <v-progress-linear v-if="!opening" indeterminate></v-progress-linear>
-    <div v-else>
-      <PostReplyCard ref="reply" :reply="opening" @submit-post="submitPost" />
+    <div v-else >
+      <PostReplyCard ref="reply" :reply="opening" @submit-post="submitPost"/>
     </div>
   </div>
 </template>

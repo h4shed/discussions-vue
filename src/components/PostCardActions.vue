@@ -1,27 +1,14 @@
 <template>
   <v-card-actions :class="{ 'text-small': $vuetify.breakpoint.mobile  }">
-
+    <v-btn icon @click="expands = expands ? 0 : -1">
+    <v-icon>{{ expands ? 'expand_more' : 'expand_less' }}</v-icon>
+    </v-btn>
     <v-btn :color="(post.myVote > 0) ? 'success' : ''" small icon @click="vote(1)">
       <v-icon>thumb_up</v-icon>
     </v-btn>
     <span>{{ post.getVoteScore() }}</span>
     <v-btn :color="(post.myVote < 0) ? 'error': ''" small icon @click="vote(-1)">
       <v-icon>thumb_down</v-icon>
-    </v-btn>
-
-    <v-btn v-if="!isLoggedIn || (myPublicKey != post.pub)" text @click="sendTip()">
-      <v-icon>attach_money</v-icon>
-    </v-btn>
-
-    <PostThreadLink btn :post="post" v-if="!isCommentDisplay">
-      <span>
-        <v-icon>comment</v-icon>
-        {{ post.totalReplies }}
-      </span>
-    </PostThreadLink>
-
-    <v-btn text v-else @click="$emit('reply')">
-      <v-icon>comment</v-icon>
     </v-btn>
 
     <v-btn text @click="mediaViewer()" v-show="false">
@@ -33,7 +20,20 @@
       <span>{{ post.views }}</span>
     </v-btn>
 
-    <v-spacer></v-spacer>
+    <PostThreadLink btn :post="post" v-if="!isCommentDisplay">
+      <span>
+        <v-icon>comment</v-icon>
+        {{ post.totalReplies }}
+      </span>
+    </PostThreadLink>
+
+        <v-btn text v-else @click="$emit('reply')">
+      <v-icon>comment</v-icon>
+    </v-btn>
+
+    <v-btn v-if="!isLoggedIn || (myPublicKey != post.pub)" text @click="sendTip()">
+      <v-icon>attach_money</v-icon>
+    </v-btn>
 
     <v-menu>
       <template v-slot:activator="{ on, attrs }">
@@ -105,7 +105,9 @@
         </v-list-item>
       </v-list>
     </v-menu>
+    <PostCardInfo :post="post" />
   </v-card-actions>
+
 </template>
 
 <script>
@@ -118,6 +120,7 @@ import {
 } from "@/novusphere-js/discussions/api";
 import { sleep } from "@/novusphere-js/utility";
 import config from "@/server/site";
+import PostCardInfo from "@/components/PostCardInfo";
 
 import { threadLinkMixin } from "@/mixins/threadLink";
 
@@ -130,6 +133,7 @@ export default {
   components: {
     //PublicKeyIcon
     PostThreadLink,
+    PostCardInfo,
     TransactionLink,
     //PostTips
   },
@@ -137,6 +141,7 @@ export default {
     post: Object,
     noEdit: Boolean,
     isCommentDisplay: Boolean,
+    expands: Number,
   },
   computed: {
     ...mapGetters(["isLoggedIn", "isThreadWatched"]),
@@ -145,9 +150,23 @@ export default {
       myPublicKey: (state) => (state.keys ? state.keys.arbitrary.pub : ""),
     }),
   },
+  watch: {
+  expands: function() {
+    this.$emit("expandsProxy", this.expands);
+    },
+    isCompactDisplay() {
+      if (this.isCompactDisplay) this.expands = -1;
+      else this.expands = 0;
+    },
+  },
+
   data: () => ({
-    //
+  expands: 0, // 0 is show, -1 is don't show
   }),
+  async mounted() {
+    if (this.isCompactDisplay) this.expands = -1;
+    else this.expands = 0;
+  },
   methods: {
     async mediaViewer() {
       const srcs = await this.post.getAllContentImages();
